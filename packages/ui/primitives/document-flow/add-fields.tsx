@@ -66,6 +66,33 @@ const MIN_WIDTH_PX = 36;
 const DEFAULT_HEIGHT_PX = MIN_HEIGHT_PX * 2.5;
 const DEFAULT_WIDTH_PX = MIN_WIDTH_PX * 2.5;
 
+// BEI: Per-field-type size multipliers (applied on top of defaults)
+// Based on DocuSign, Adobe Sign, Dropbox Sign best practices for A4 documents
+const FIELD_WIDTH_MULTIPLIER: Record<string, number> = {
+  SIGNATURE: 2.4,
+  FREE_SIGNATURE: 2.4,
+  EMAIL: 3.1,
+  NAME: 2.4,
+  DATE: 1.5,
+  TEXT: 4.4,
+  NUMBER: 1.3,
+  RADIO: 2.0,
+  CHECKBOX: 2.0,
+  DROPDOWN: 2.0,
+};
+
+const FIELD_HEIGHT_MULTIPLIER: Record<string, number> = {
+  SIGNATURE: 2.4,
+  FREE_SIGNATURE: 2.4,
+  EMAIL: 0.8,
+  NAME: 0.8,
+  DATE: 0.8,
+  TEXT: 3.2,
+  NUMBER: 0.8,
+  RADIO: 4.0,
+  CHECKBOX: 4.0,
+};
+
 export type FieldFormType = {
   nativeId?: number;
   formId: string;
@@ -316,8 +343,11 @@ export const AddFieldsFormPartial = ({
       let pageY = ((event.pageY - top) / height) * 100;
 
       // Get the bounds as a percentage of the page width and height
-      const fieldPageWidth = (fieldBounds.current.width / width) * 100;
-      const fieldPageHeight = (fieldBounds.current.height / height) * 100;
+      // BEI: Apply per-field-type size multipliers
+      const wMul = FIELD_WIDTH_MULTIPLIER[selectedField] ?? 1;
+      const hMul = FIELD_HEIGHT_MULTIPLIER[selectedField] ?? 1;
+      const fieldPageWidth = ((fieldBounds.current.width * wMul) / width) * 100;
+      const fieldPageHeight = ((fieldBounds.current.height * hMul) / height) * 100;
 
       // And center it based on the bounds
       pageX -= fieldPageWidth / 2;
